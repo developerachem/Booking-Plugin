@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Ride Booking — Project Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c23;
+    --border: #1f2430;
+    --accent: #f5a623;
+    --accent2: #3dd68c;
+    --accent3: #5b8af5;
+    --danger: #f55b5b;
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --text-dim: #9ca3af;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 80px 0;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0d1117 0%, #111827 60%, #0f1923 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 40px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(245,166,35,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 20%;
+    width: 400px; height: 200px;
+    background: radial-gradient(ellipse, rgba(91,138,245,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245,166,35,0.1);
+    border: 1px solid rgba(245,166,35,0.25);
+    color: var(--accent);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(26px, 4vw, 42px);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 8px;
+  }
+  .header h1 span { color: var(--accent); }
+  .header p {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 28px;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+  .stat-pill .label { color: var(--text-muted); }
+  .stat-pill .val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .stat-pill.total .val { color: var(--text); }
+  .stat-pill.done .val { color: var(--accent2); }
+  .stat-pill.pending .val { color: var(--accent); }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .progress-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .progress-pct {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--accent2);
+    min-width: 40px;
+    text-align: right;
+  }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 36px 20px 0;
+  }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background 0.15s;
+    gap: 12px;
+  }
+  .section-header:hover { background: var(--surface2); }
+  .section-header.open { border-bottom-color: var(--border); }
+  .section-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #fff;
+  }
+  .section-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .section-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .section-count {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 10px;
+  }
+  .section-count .done-num { color: var(--accent2); font-weight: 600; }
+  .chevron {
+    color: var(--text-muted);
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
+  .section-header.open .chevron { transform: rotate(180deg); }
+
+  /* SUBSECTION */
+  .subsection {
+    padding: 0 24px 4px;
+  }
+  .subsection-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 18px 0 10px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .subsection-title::before {
+    content: '';
+    width: 3px; height: 12px;
+    border-radius: 2px;
+    background: var(--accent3);
+  }
+
+  /* CHECKLIST ITEM */
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(31,36,48,0.5);
+    transition: background 0.1s;
+    cursor: pointer;
+    border-radius: 6px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { background: rgba(255,255,255,0.02); }
+  .check-item input[type="checkbox"] {
+    width: 16px; height: 16px;
+    min-width: 16px;
+    margin-top: 2px;
+    accent-color: var(--accent2);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .check-label {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.55;
+    flex: 1;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .check-item:has(input:checked) .check-label {
+    color: var(--text-muted);
+    text-decoration: line-through;
+    text-decoration-color: rgba(255,255,255,0.15);
+  }
+  .check-tag {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    text-transform: uppercase;
+  }
+  .tag-high { background: rgba(245,91,91,0.12); color: #f55b5b; border: 1px solid rgba(245,91,91,0.2); }
+  .tag-med { background: rgba(245,166,35,0.12); color: var(--accent); border: 1px solid rgba(245,166,35,0.2); }
+  .tag-low { background: rgba(61,214,140,0.1); color: var(--accent2); border: 1px solid rgba(61,214,140,0.2); }
+  .tag-security { background: rgba(91,138,245,0.12); color: var(--accent3); border: 1px solid rgba(91,138,245,0.2); }
+
+  /* COLLAPSIBLE BODY */
+  .section-body {
+    display: none;
+    padding: 0 0 16px;
+  }
+  .section-body.open { display: block; }
+
+  /* TOOLBAR */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 20px 20px 0;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .filter-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .filter-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #000;
+  }
+  .reset-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(245,91,91,0.3);
+    background: transparent;
+    color: var(--danger);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .reset-btn:hover { background: rgba(245,91,91,0.1); }
+
+  /* COLOR LEGEND */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 20px 0;
+    font-size: 11px;
+    color: var(--text-muted);
+    align-items: center;
+  }
+  .legend span { margin-right: 2px; }
+
+  @media (max-width: 640px) {
+    .header { padding: 28px 20px 24px; }
+    .main { padding: 24px 12px 0; }
+    .subsection { padding: 0 14px 4px; }
+    .section-header { padding: 14px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">📋 Project Checklist</div>
+  <h1>Online Ride <span>Booking</span><br>WordPress Plugin</h1>
+  <p>Reference: bookridesonline.com &nbsp;·&nbsp; onlineridebooking.com</p>
+  <div class="stats-bar">
+    <div class="stat-pill total"><span class="label">Total Items</span><span class="val" id="totalCount">0</span></div>
+    <div class="stat-pill done"><span class="label">Completed</span><span class="val" id="doneCount">0</span></div>
+    <div class="stat-pill pending"><span class="label">Remaining</span><span class="val" id="pendingCount">0</span></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+    <div class="progress-pct" id="progressPct">0%</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="toolbar">
+    <div class="filter-btns">
+      <button class="filter-btn active" onclick="filterAll(this)">All</button>
+      <button class="filter-btn" onclick="filterPending(this)">Pending Only</button>
+      <button class="filter-btn" onclick="filterDone(this)">Completed</button>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">↺ Reset All</button>
+  </div>
+  <div class="legend">
+    <span>Priority:</span>
+    <span class="check-tag tag-high">High</span>
+    <span class="check-tag tag-med">Medium</span>
+    <span class="check-tag tag-low">Low</span>
+    <span class="check-tag tag-security">Security</span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 1: Plugin Foundation -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s1">
+    <div class="section-header open" onclick="toggleSection('s1')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(91,138,245,0.12);">🏗️</div>
+        <div>
+          <div class="section-title">Plugin Foundation & Structure</div>
+          <div class="section-subtitle">Core plugin setup, file structure, hooks, WP-CLI</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s1-done">0</span> / <span id="s1-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body open" id="s1-body">
+      <div class="subsection">
+        <div class="subsection-title">Plugin Core</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create main plugin file with proper plugin header (Plugin Name, Version, Author, Text Domain, etc.)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Define plugin constants (ORB_PLUGIN_DIR, ORB_PLUGIN_URL, ORB_VERSION)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Set up PSR-4 autoloader or manual class loader for all PHP classes</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create plugin activation hook — run DB table migrations, set default options</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create plugin deactivation hook — flush rewrite rules, clear scheduled crons</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create plugin uninstall hook — remove all plugin data (tables, options, roles) when requested</span><span class="check-tag tag-low">Low</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Register custom post types: Bookings, Vehicles, Drivers, Extras, Coupons</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Alternatively, create custom DB tables for bookings, transactions, extras, logs</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Set up versioned DB schema with dbDelta() for safe upgrades</span><span class="check-tag tag-high">High</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">User Roles & Capabilities</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create "Customer" role (or use Subscriber) with booking-related caps</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create "Corporate Client" role — can manage multiple passengers/sub-users</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create "Driver" role — can only view their own assigned trips</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create "Dispatcher/Manager" role — can dispatch, assign drivers, edit bookings</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Administrator retains full control over all plugin features</span><span class="check-tag tag-high">High</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">WP-CLI & Hooks</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Register all admin-facing hooks (admin_menu, admin_enqueue_scripts, admin_init)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Register all frontend hooks (wp_enqueue_scripts, init, template_redirect)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create WP-CLI commands: import bookings, list vehicles, send test notifications</span><span class="check-tag tag-low">Low</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Set up text domain and load_plugin_textdomain() for i18n/l10n</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Expose WP REST API endpoints for bookings, vehicles, drivers</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 2: Booking Form (Frontend) -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s2">
+    <div class="section-header open" onclick="toggleSection('s2')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(245,166,35,0.12);">📝</div>
+        <div>
+          <div class="section-title">Booking Form (Frontend)</div>
+          <div class="section-subtitle">Multi-step form, Google Maps, quotes, shortcode</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s2-done">0</span> / <span id="s2-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body open" id="s2-body">
+      <div class="subsection">
+        <div class="subsection-title">Form Embedding</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Register [online_ride_booking] shortcode to embed booking form on any page/post</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create Gutenberg block to embed the booking form via block editor</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create legacy WP widget for sidebar/widget-area embedding</span><span class="check-tag tag-low">Low</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Multi-Step Form Steps</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 1: Trip Type — one-way, return trip, or hourly</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 1: Pickup address with Google Places Autocomplete</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 1: Drop-off address with Google Places Autocomplete</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 1: Support adding multiple intermediate stops</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 1: Pickup date & time selector (date picker + time picker)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 1: Return date & time selector (when return trip selected)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 1: Passenger count selector</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 1: Luggage count selector</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 2: Vehicle selection — display available cars with images, capacity, and price</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 2: Instant quote displayed per vehicle based on route + pricing rules</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 3: Extras/Add-ons selection (child seat, meet & greet, etc.) with prices</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 3: Promo/coupon code input field with live validation</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 4: Customer details — name, email, phone, flight number (if applicable)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 4: Special instructions / notes field</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 5: Order summary — all details, itemized pricing, total</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Step 5: Payment — select gateway (Stripe / Authorize.Net / Cash) and complete</span><span class="check-tag tag-high">High</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Google Maps & Routing</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Integrate Google Places API for address autocomplete on pickup/dropoff fields</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Use Google Directions API to calculate route distance (km/mi) and duration</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Configure Directions API to always avoid toll roads on all route calculations</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Display route map preview on the booking form</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Store Google Maps API key securely in plugin settings (admin-only)</span><span class="check-tag tag-security">Security</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">UX & Responsiveness</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Full mobile-responsive design — works on all screen sizes</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Progress indicator showing current step of the booking process</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Client-side form validation with user-friendly error messages</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Back/forward navigation between form steps without losing data</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">WCAG accessibility — proper labels, ARIA attributes, keyboard navigation</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Loading spinner/overlay during API calls and price calculations</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 3: Pricing Rules & Quotes -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s3">
+    <div class="section-header" onclick="toggleSection('s3')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(61,214,140,0.1);">💲</div>
+        <div>
+          <div class="section-title">Pricing Rules & Quote Engine</div>
+          <div class="section-subtitle">Distance, hourly, flat rates, tiers, peak adjustments</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s3-done">0</span> / <span id="s3-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body" id="s3-body">
+      <div class="subsection">
+        <div class="subsection-title">Pricing Models</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Distance-based pricing — base fare + per-km/mile rate configurable per vehicle</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Hourly pricing — configurable hourly rate per vehicle type</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Flat-rate/fixed-price routes — admin can define specific pickup-dropoff pairs with a fixed price (e.g., airport runs)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Tiered pricing — different per-km rates based on total distance bands</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Minimum fare setting per vehicle to prevent underpriced short trips</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Adjustments & Surcharges</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Peak-hour / time-of-day rate multipliers (e.g., +20% on weekday mornings)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Seasonal pricing adjustments (holiday rates, summer surcharges)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Stackable adjustments — multiple rules can apply to one booking simultaneously</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Extra add-ons priced individually (child seat, meet & greet, luggage assist)</span><span class="check-tag tag-high">High</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Coupons & Discounts</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Coupon code system — percentage discount or fixed amount off</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Coupon validity dates (start/expiry)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Per-coupon usage limits (total uses and per-customer uses)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">AJAX coupon validation with instant feedback on the booking form</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Display coupon discount line-item in quote and invoice</span><span class="check-tag tag-high">High</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Quote Engine</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Real-time price calculation via AJAX as user selects vehicle/extras/coupon</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Cache quotes temporarily (transients) to reduce API calls during form browsing</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Itemized breakdown shown: base fare, distance, extras, surcharges, discount, total</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Support both km and miles units (configurable in settings)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Support multiple currencies (configurable in settings)</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 4: Payment Gateways -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s4">
+    <div class="section-header" onclick="toggleSection('s4')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(245,91,91,0.1);">💳</div>
+        <div>
+          <div class="section-title">Payment Gateways & Transactions</div>
+          <div class="section-subtitle">Stripe, Authorize.Net, Cash, PCI compliance, webhooks</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s4-done">0</span> / <span id="s4-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body" id="s4-body">
+      <div class="subsection">
+        <div class="subsection-title">Stripe Integration</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Integrate Stripe Elements (card UI) — card data never touches our server</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create Stripe PaymentIntent on booking form submit via AJAX</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Store Stripe customer ID and payment method token (not raw card data)</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Register Stripe webhook endpoint — handle charge.succeeded, payment_intent events</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Support deposit-only payment or full payment option via Stripe</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Stripe refund capability from admin panel</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Authorize.Net Integration</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Integrate Authorize.Net Accept.js for tokenized card input</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Create and store Authorize.Net Customer Profiles (CIM) for saved cards</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Handle Authorize.Net IPN/webhook for transaction status updates</span><span class="check-tag tag-high">High</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Cash & Invoice Options</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Cash payment option — booking confirmed without online payment, marked "pending payment"</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Post-trip invoicing option — admin can send invoice after ride is completed</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Admin can manually mark a booking as paid from the backend</span><span class="check-tag tag-high">High</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Transaction Records</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Save every transaction: booking ID, amount, gateway, transaction ID, status, timestamp</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Display transaction history per booking in admin and user dashboard</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Auto-generate downloadable PDF invoice per payment</span><span class="check-tag tag-high">High</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 5: User Dashboard -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s5">
+    <div class="section-header" onclick="toggleSection('s5')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(61,214,140,0.12);">👤</div>
+        <div>
+          <div class="section-title">User Dashboard (/user-dashboard)</div>
+          <div class="section-subtitle">Account creation, bookings, payments, reports</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s5-done">0</span> / <span id="s5-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body" id="s5-body">
+      <div class="subsection">
+        <div class="subsection-title">Account Creation Logic</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Disable manual user registration from WP default registration page</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Auto-create WP user account when a booking is completed (using provided email)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">If email already exists, link booking to existing account</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Send password setup / welcome email with secure one-time link upon account creation</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">After booking, redirect user to their booking details page in the dashboard</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Support guest checkout — bookings stored by email even without an account</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">My Bookings Page</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">List all current and past bookings with status, date, route summary, total</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Pop-up modal for each booking showing full booking details (vehicle, driver, route, extras)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">User can modify booking only if pickup is more than 12 hours away</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">User cannot delete bookings (no delete option exposed)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">On any booking modification, auto-send confirmation emails to admin, driver, and customer</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Booking status badge (Pending / Confirmed / Completed / Cancelled) prominently shown</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Downloadable PDF invoice per booking</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Dashboard Overview Page</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Summary cards: Total bookings, upcoming rides, total spent, loyalty points (if applicable)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Usage chart: booking history over time (monthly/yearly)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Upcoming booking widget with quick-view details</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Payment Methods Page</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Display saved payment methods (Stripe/Authorize.Net tokens)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Add new card via Stripe Elements / Authorize.Net Accept.js</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Remove saved payment method (deletes token from gateway)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Set a default payment method</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Reports Page</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">View full booking history with filtering by date range and status</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Downloadable CSV or PDF summary of booking/payment history</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Per-booking invoice download from reports list</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Profile & Account Settings</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Edit personal info (name, phone, address)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Change password with current-password verification</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">GDPR: data export and account deletion request options</span><span class="check-tag tag-security">Security</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 6: Driver Dashboard -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s6">
+    <div class="section-header" onclick="toggleSection('s6')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(245,166,35,0.1);">🚘</div>
+        <div>
+          <div class="section-title">Driver Dashboard (/driver-dashboard)</div>
+          <div class="section-subtitle">Rides overview, earnings, trip details</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s6-done">0</span> / <span id="s6-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body" id="s6-body">
+      <div class="subsection">
+        <div class="subsection-title">Dashboard Overview</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Stats cards: Total rides completed, upcoming bookings count, total earnings</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Earnings overview chart (weekly/monthly breakdown)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Driver can ONLY see bookings assigned to them (not others')</span><span class="check-tag tag-high">High</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">My Rides Sections</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Upcoming Rides — list of assigned future bookings with date, time, pickup/dropoff</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Ongoing Rides — currently active trip details</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Completed Rides — history of past trips with price and customer info</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Per-ride detail view: full pickup address, dropoff, customer name/phone, order price, notes</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Driver CANNOT modify any booking details</span><span class="check-tag tag-high">High</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 7: Admin UI & Backend -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s7">
+    <div class="section-header" onclick="toggleSection('s7')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(91,138,245,0.12);">⚙️</div>
+        <div>
+          <div class="section-title">Admin UI & Backend Management</div>
+          <div class="section-subtitle">Menus, bookings list, vehicles, drivers, settings</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s7-done">0</span> / <span id="s7-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body" id="s7-body">
+      <div class="subsection">
+        <div class="subsection-title">Menu Structure</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Top-level admin menu "Limo Booking" with custom icon</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Submenu: Bookings (list all bookings)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Submenu: Vehicles (manage vehicle types)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Submenu: Drivers (manage driver profiles)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Submenu: Extras (manage add-ons and pricing)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Submenu: Customers (view/manage customer accounts)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Submenu: Coupons (manage promo codes)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Submenu: Settings (global plugin configuration)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Submenu: Reports (admin analytics and exports)</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Bookings Management</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Bookings list table — columns: ID, date, customer, pickup, dropoff, status, total, actions</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Filter bookings by date range, status (pending/confirmed/cancelled), driver, vehicle</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Bulk actions: confirm, cancel, delete multiple bookings</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Add/Edit booking screen with full form (customer, vehicle, date, addresses, status, notes)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Assign/reassign driver to a booking from the admin edit screen</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Apply coupon to booking from admin</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Mark booking as paid / partially paid from admin</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Admin calendar view showing all bookings scheduled on a daily/weekly/monthly view</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Vehicles Management</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Add/edit vehicle: name, description, passenger capacity, baggage capacity</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Upload vehicle images (gallery)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Per-vehicle pricing rules: base fare, per-km rate, hourly rate</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Per-vehicle flat-rate routes configuration</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Enable/disable vehicle from being shown in booking form</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Drivers Management</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Add/edit driver profile: name, email, phone, assigned vehicle</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Driver availability schedule (days/hours available)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">View all bookings assigned to a specific driver</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Driver WP user account auto-created when driver profile is saved</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Settings Page</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">General settings: company name, logo, address, phone (used in emails)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Currency selection and decimal/thousands separator format</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Date/time format settings (12hr/24hr, regional formats)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Distance unit toggle: km or miles</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Google Maps API key field</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Stripe API keys (publishable + secret)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Authorize.Net API credentials (Login ID + Transaction Key)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">SMS provider settings (Twilio credentials or similar)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Email SMTP settings (or use WP default mailer)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Google Calendar API credentials for calendar sync</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Customizable email template editor (HTML / visual editor for each email type)</span><span class="check-tag tag-high">High</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 8: Notifications -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s8">
+    <div class="section-header" onclick="toggleSection('s8')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(245,166,35,0.12);">🔔</div>
+        <div>
+          <div class="section-title">Email & SMS Notifications</div>
+          <div class="section-subtitle">White-labeled emails, SMS updates, custom templates</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s8-done">0</span> / <span id="s8-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body" id="s8-body">
+      <div class="subsection">
+        <div class="subsection-title">Email Notifications</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Customer booking confirmation email with full details + invoice</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Admin new booking notification email</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Driver assignment notification email to driver</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Booking modification confirmation to admin, driver, and customer</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Booking cancellation notification to all parties</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Payment received confirmation email with receipt</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Payment failed notification to customer</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Pre-trip reminder email (e.g., 24h before pickup) via WP-Cron</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Account creation welcome email with password setup link</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">All emails white-labeled with company logo, name, address</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Admin can customize each email template via HTML/visual editor in settings</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Dynamic placeholders in templates: {customer_name}, {booking_id}, {pickup_address}, etc.</span><span class="check-tag tag-high">High</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">SMS Notifications</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">SMS: driver en route notification to customer</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">SMS: driver arrived notification to customer</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">SMS: booking confirmation to customer</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">SMS: pre-trip reminder to customer</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Integrate SMS via Twilio (or similar) — configurable in settings</span><span class="check-tag tag-high">High</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 9: Calendar & Scheduling -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s9">
+    <div class="section-header" onclick="toggleSection('s9')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(61,214,140,0.1);">📅</div>
+        <div>
+          <div class="section-title">Calendar & Scheduling</div>
+          <div class="section-subtitle">Google Calendar sync, WP-Cron, reminders</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s9-done">0</span> / <span id="s9-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body" id="s9-body">
+      <div class="subsection">
+        <div class="subsection-title">Calendar Features</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Admin backend calendar showing all confirmed bookings by day/week/month</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Google Calendar API integration — sync confirmed bookings to Google Calendar</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Google Calendar: create event on booking confirmation, update on modification, delete on cancellation</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Color-coded calendar entries by driver or vehicle type</span><span class="check-tag tag-low">Low</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">WP-Cron Jobs</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Cron: send 24h pre-trip reminder emails to customers</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Cron: send driver reminder/briefing for next-day bookings</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Cron: auto-cancel unpaid bookings after X hours (configurable)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Cron: clean up expired quote transients and temporary session data</span><span class="check-tag tag-low">Low</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 10: Security & Compliance -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s10">
+    <div class="section-header" onclick="toggleSection('s10')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(245,91,91,0.1);">🔐</div>
+        <div>
+          <div class="section-title">Security & Compliance</div>
+          <div class="section-subtitle">Nonces, PCI DSS, GDPR, input sanitization, logs</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s10-done">0</span> / <span id="s10-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body" id="s10-body">
+      <div class="subsection">
+        <div class="subsection-title">WordPress Security</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Nonce verification on all forms and AJAX actions</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Capability checks (current_user_can) on all admin and frontend actions</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Input sanitization on all form fields (sanitize_text_field, absint, etc.)</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Output escaping on all data rendered to HTML (esc_html, esc_attr, wp_kses)</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Enforce HTTPS/SSL for all payment pages (force redirect if not SSL)</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Protect REST API endpoints with authentication (nonce or app passwords)</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Rate-limit booking form submissions to prevent spam/brute force</span><span class="check-tag tag-security">Security</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">PCI Compliance</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Never store raw card data — use Stripe Elements / Authorize.Net tokens only</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Verify Stripe webhook signatures to prevent spoofed events</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">All API keys stored encrypted in WP options (not hardcoded)</span><span class="check-tag tag-security">Security</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">GDPR Compliance</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Implement WP Personal Data Exporter — export all booking & customer data</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Implement WP Personal Data Eraser — delete user data on erasure request</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Add privacy policy consent checkbox on booking form</span><span class="check-tag tag-security">Security</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">User can request account deletion from dashboard (triggers erasure workflow)</span><span class="check-tag tag-security">Security</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Logging & Audit</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Log all payment transactions (amount, gateway, status, timestamp)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Log booking status changes with who made the change and when</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Log failed login attempts on dashboard pages</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Admin can view activity log from backend</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 11: Performance & Caching -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s11">
+    <div class="section-header" onclick="toggleSection('s11')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(61,214,140,0.1);">⚡</div>
+        <div>
+          <div class="section-title">Performance, Caching & Scalability</div>
+          <div class="section-subtitle">Redis, transients, DB indexing, async tasks</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s11-done">0</span> / <span id="s11-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body" id="s11-body">
+      <div class="subsection">
+        <div class="subsection-title">Caching</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Use WP transients to cache expensive queries (route distance, availability)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Support Redis / Memcached object caching for high-traffic sites</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Bypass full-page cache for booking form pages and AJAX endpoints</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Clear relevant caches on pricing rule changes or vehicle updates</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Enqueue CSS/JS with versioned handles for far-future browser caching</span><span class="check-tag tag-low">Low</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Database & Async</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Custom DB tables indexed on booking_date, status, customer_id for fast queries</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Use Action Scheduler (WooCommerce library) or WP-Cron for background/async tasks</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Queue email/SMS sending as background jobs to avoid slowing down form submission</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Avoid N+1 queries — use batch queries where fetching related data</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Testing & QA</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">PHPUnit tests for pricing engine, booking creation, coupon validation</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Integration tests for payment gateway flows (Stripe test mode, Authorize.Net sandbox)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Load test booking form under concurrent users</span><span class="check-tag tag-low">Low</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Profile with Query Monitor to identify slow queries</span><span class="check-tag tag-low">Low</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!-- SECTION 12: Data Models & API -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div class="section" id="s12">
+    <div class="section-header" onclick="toggleSection('s12')">
+      <div class="section-left">
+        <div class="section-icon" style="background:rgba(91,138,245,0.1);">🗄️</div>
+        <div>
+          <div class="section-title">Data Models & REST API</div>
+          <div class="section-subtitle">Bookings, customers, vehicles, drivers, logs schema</div>
+        </div>
+      </div>
+      <div class="section-meta">
+        <span class="section-count"><span class="done-num" id="s12-done">0</span> / <span id="s12-total">0</span></span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body" id="s12-body">
+      <div class="subsection">
+        <div class="subsection-title">Data Model — Bookings Table</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Fields: booking_id, customer_id (or guest_email), vehicle_id, driver_id</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Fields: pickup_address, dropoff_address(es), pickup_datetime, return_datetime</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Fields: passengers, luggage, extras (relation), distance_km, duration_mins</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Fields: price_breakdown (JSON), total_price, coupon_id, payment_status, booking_status</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Fields: flight_number, notes, created_at, updated_at</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">Other Data Models</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Vehicles table: vehicle_id, name, capacity, baggage_cap, pricing rules (JSON), images, status</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Drivers table: driver_id, wp_user_id, name, email, phone, vehicle_id, availability</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Customers table (or WP users): name, email, phone, billing_info, company, notes, corporate_parent_id</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Extras table: extra_id, name, description, price, price_type (fixed/per-unit)</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Coupons table: coupon_id, code, discount_type, discount_amount, usage_limit, times_used, expiry</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Transactions table: transaction_id, booking_id, amount, gateway, gateway_txn_id, status, created_at</span><span class="check-tag tag-high">High</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">Activity log table: log_id, object_type, object_id, action, user_id, details, created_at</span><span class="check-tag tag-med">Medium</span></div>
+      </div>
+      <div class="subsection">
+        <div class="subsection-title">REST API Endpoints</div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">GET /wp-json/orb/v1/bookings — list bookings (admin/dispatcher only)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">POST /wp-json/orb/v1/bookings — create booking</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">GET /wp-json/orb/v1/bookings/{id} — get single booking (authenticated)</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">PUT /wp-json/orb/v1/bookings/{id} — update booking</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">GET /wp-json/orb/v1/vehicles — list available vehicles</span><span class="check-tag tag-med">Medium</span></div>
+        <div class="check-item" onclick="toggle(this)"><input type="checkbox"><span class="check-label">POST /wp-json/orb/v1/quote — calculate instant price quote</span><span class="check-tag tag-high">High</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+const STORAGE_KEY = 'orb_checklist_v1';
+let filterMode = 'all';
+
+function saveState() {
+  const items = document.querySelectorAll('.check-item input[type="checkbox"]');
+  const state = {};
+  items.forEach((cb, i) => { state[i] = cb.checked; });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function loadState() {
+  try {
+    const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    const items = document.querySelectorAll('.check-item input[type="checkbox"]');
+    items.forEach((cb, i) => { if (state[i]) cb.checked = true; });
+  } catch(e) {}
+}
+
+function toggle(row) {
+  const cb = row.querySelector('input[type="checkbox"]');
+  if (event.target !== cb) cb.checked = !cb.checked;
+  saveState();
+  updateStats();
+  applyFilter();
+}
+
+// ─── STATS ───────────────────────────────────────────────
+function updateStats() {
+  const allCbs = document.querySelectorAll('.check-item input[type="checkbox"]');
+  const total = allCbs.length;
+  const done = [...allCbs].filter(c => c.checked).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('doneCount').textContent = done;
+  document.getElementById('pendingCount').textContent = total - done;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+
+  // Per-section counts
+  ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12'].forEach(id => {
+    const body = document.getElementById(id + '-body');
+    if (!body) return;
+    const cbs = body.querySelectorAll('input[type="checkbox"]');
+    const secDone = [...cbs].filter(c => c.checked).length;
+    const secTotal = cbs.length;
+    const doneEl = document.getElementById(id + '-done');
+    const totalEl = document.getElementById(id + '-total');
+    if (doneEl) doneEl.textContent = secDone;
+    if (totalEl) totalEl.textContent = secTotal;
+  });
+}
+
+// ─── TOGGLE SECTIONS ─────────────────────────────────────
+function toggleSection(id) {
+  const header = document.querySelector('#' + id + ' .section-header');
+  const body = document.getElementById(id + '-body');
+  header.classList.toggle('open');
+  body.classList.toggle('open');
+}
+
+// ─── FILTERS ─────────────────────────────────────────────
+function filterAll(btn) {
+  filterMode = 'all';
+  setActiveBtn(btn);
+  applyFilter();
+}
+function filterPending(btn) {
+  filterMode = 'pending';
+  setActiveBtn(btn);
+  applyFilter();
+}
+function filterDone(btn) {
+  filterMode = 'done';
+  setActiveBtn(btn);
+  applyFilter();
+}
+function setActiveBtn(btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function applyFilter() {
+  const items = document.querySelectorAll('.check-item');
+  items.forEach(item => {
+    const cb = item.querySelector('input[type="checkbox"]');
+    if (filterMode === 'all') item.style.display = '';
+    else if (filterMode === 'pending') item.style.display = cb.checked ? 'none' : '';
+    else if (filterMode === 'done') item.style.display = cb.checked ? '' : 'none';
+  });
+}
+
+// ─── RESET ───────────────────────────────────────────────
+function resetAll() {
+  if (!confirm('Reset all checkboxes? This cannot be undone.')) return;
+  document.querySelectorAll('.check-item input[type="checkbox"]').forEach(cb => cb.checked = false);
+  localStorage.removeItem(STORAGE_KEY);
+  updateStats();
+  applyFilter();
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+loadState();
+updateStats();
+
+// Open first few sections by default
+['s1','s2'].forEach(id => {
+  const body = document.getElementById(id + '-body');
+  const header = document.querySelector('#' + id + ' .section-header');
+  if (body && !body.classList.contains('open')) {
+    body.classList.add('open');
+    header.classList.add('open');
+  }
+});
+</script>
+</body>
+</html>
